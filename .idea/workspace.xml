@@ -4,7 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ab150885-ebad-41a4-bd0f-b6cf29b41992" name="변경" comment="create expo" />
+    <list default="true" id="ab150885-ebad-41a4-bd0f-b6cf29b41992" name="변경" comment="create expo">
+      <change afterPath="$PROJECT_DIR$/medi/src/components/Alarm.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/AlarmList.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/Calendar.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/CalendarHome.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/CountdownTimer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/Home.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/Login.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/Medicine.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/MedicineBox.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/MedicineList.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/components/Tapbar.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/images/kakaoLogo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/medi/src/images/loginMain.png" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -12,6 +26,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="projectConfigVersion" value="5" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -27,7 +44,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/ayeong-kim/Desktop/Project/NewMedi",
+    "last_opened_file_path": "/Users/ayeong-kim/Desktop/Project/NewMedi/medi/src/images",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -36,6 +53,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/medi/src/images" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="디폴트 작업">
@@ -45,6 +67,7 @@
       <option name="presentableId" value="Default" />
       <updated>1671434106267</updated>
       <workItem from="1671434107498" duration="541000" />
+      <workItem from="1671434685731" duration="483000" />
     </task>
     <task id="LOCAL-00001" summary="create expo">
       <created>1671434499467</created>
@@ -53,7 +76,14 @@
       <option name="project" value="LOCAL" />
       <updated>1671434499467</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="create expo">
+      <created>1671434758645</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1671434758645</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

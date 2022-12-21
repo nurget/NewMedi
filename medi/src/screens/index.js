@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text, View, Dimensions } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
@@ -10,121 +10,153 @@ import AlarmScreen from './AlarmScreen';
 import MedicineBoxScreen from './MedicineBoxScreen';
 import LoginScreen from './LoginScreen';
 import MypageScreen from './MypageScreen';
-import HomeIcon from '../img/Home.png';
-import calendarIcon from '../img/calendar.png';
-import alarmIcon from '../img/alarm.png';
-import medicineBoxIcon from '../img/medicineBox.png';
-import myPageIcon from '../img/myPage.png';
+import EditMyinfoScreen from './MypageScreen/EditMyinfo';
+import CameraScreen from './CameraScreen';
+import CameraNoticeScreen from './CameraNoticeScreen';
+import CheckScreen from './CheckScreen';
+import SelfInputScreen from './SelfInputScreen';
+import AlarmUpdateScreen from './AlarmUpdateScreen';
+import MedicineDetailScreen from './MedicineBoxScreen/MedicineDetailScreen';
+import DeleteCheckScreen from './AlarmUpdateScreen/DeleteCheck';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import SignUpScreen from './LoginScreen/SignUp';
+import FindIdScreen from './LoginScreen/FindId';
+import FindPwScreen from './LoginScreen/FindPw';
 
-// import { useAsyncStorage } from '@react-native-community/async-storage';
-// const { getItem } = useAsyncStorage('@yag_olim');
+const window = Dimensions.get('window');
 
-// const _retrieveData = async () => {
-//   const value = await getItem();
-//   if (value !== null) {
-//     console.log(value);
-//     //this.setState({ isAuthorized: true });
-//     console.log('success');
-//     return value;
-//   }
-// };
-
-const LoginStack = createStackNavigator(
-  {
-    LoginScreen,
-  },
-  {
-    TabNavigator: {
-      screen: TabNavigator,
-      navigationOptions: ({ navigation }) => ({
-        headerShown: false,
-      }),
-    },
-  },
-);
-
-const HomeStack = createStackNavigator(
-  {
-    HomeScreen,
-  },
-  // if you need.
-  // recommend custom header
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      title: 'Home',
-      headerShown: false,
-    }),
-  },
-);
-const CalendarStack = createStackNavigator(
-  {
-    CalendarScreen,
-  },
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      title: 'Calendar',
-      headerShown: false,
-    }),
-    initialRouteName: 'CalendarScreen',
-  },
-);
-const AlarmStack = createStackNavigator(
-  {
-    AlarmScreen,
-  },
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      title: 'Alarm',
-      headerShown: false,
-    }),
-    initialRouteName: 'AlarmScreen',
-  },
-);
-const MedicineBoxStack = createStackNavigator(
-  {
-    MedicineBoxScreen,
-  },
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      title: 'MedicineBox',
-      headerShown: false,
-    }),
-    initialRouteName: 'MedicineBoxScreen',
-  },
-);
 const MypageStack = createStackNavigator(
   {
-    MypageScreen,
+    Mypage: MypageScreen,
+    LoginScreen: LoginScreen,
+    EditMyinfoScreen: EditMyinfoScreen,
   },
   {
-    defaultNavigationOptions: ({ navigation }) => ({
-      title: 'Mypage',
-      headerShown: false,
-    }),
-    initialRouteName: 'MypageScreen',
+    initialRouteName: 'Mypage',
+    headerMode: 'none',
+    headerShown: false,
+  },
+);
+
+const AlarmStack = createStackNavigator(
+  {
+    Alarm: AlarmScreen,
+    SelfInputScreen: SelfInputScreen,
+  },
+  {
+    initialRouteName: 'Alarm',
+    headerMode: 'none',
+    headerShown: false,
+  },
+);
+
+const CalendarStack = createStackNavigator(
+  {
+    Calendar: CalendarScreen,
+    AlarmUpdateScreen: AlarmUpdateScreen,
+    SelfInputScreen: SelfInputScreen,
+    DeleteCheck: DeleteCheckScreen,
+  },
+  {
+    headerMode: 'none',
+    headerShown: false,
+  },
+);
+
+const MedicineBoxStack = createStackNavigator(
+  {
+    MedicineBox: MedicineBoxScreen,
+    MedicineDetail: MedicineDetailScreen,
+  },
+  {
+    headerMode: 'none',
+    headerShown: false,
   },
 );
 
 const TabNavigator = createBottomTabNavigator(
   {
-    Home: HomeStack,
-    Calendar: CalendarStack,
-    Alarm: AlarmStack,
-    MedicineBox: MedicineBoxStack,
-    Mypage: MypageStack,
+    Home: { screen: HomeScreen },
+    Calendar: { screen: CalendarStack },
+    Alarm: { screen: AlarmStack },
+    MedicineBox: { screen: MedicineBoxStack },
+    Mypage: { screen: MypageStack },
   },
   {
-    lazy: false,
+    defaultNavigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused }) => {
+        const { routeName } = navigation.state;
+
+        if (routeName === 'Home') {
+          return (
+            <View>
+              <Icon name="home" size={25} color={(focused && '#6a9c90') || '#888'} />
+            </View>
+          );
+        }
+        if (routeName === 'Calendar') {
+          return (
+            <View style={{ paddingRight: 10 }}>
+              <Icon name="calendar-alt" size={25} color={(focused && '#6a9c90') || '#888'} />
+            </View>
+          );
+        }
+        if (routeName === 'Alarm') {
+          return (
+            <View
+              style={{
+                backgroundColor: '#6a9c90',
+                width: window.height * 0.09,
+                height: window.height * 0.06,
+                borderRadius: window.height * 0.06,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {/* <Icon name="clock" size={25} color={(focused && '#6a9c90') || '#888'} /> */}
+              <Text style={{ color: 'white', fontSize: 30, fontWeight: '800', marginBottom: 5 }}>
+                +
+              </Text>
+            </View>
+          );
+        }
+        if (routeName === 'MedicineBox') {
+          return (
+            <View style={{ paddingLeft: 10 }}>
+              <Icon name="pills" size={25} color={(focused && '#6a9c90') || '#888'} />
+            </View>
+          );
+        }
+        if (routeName === 'Mypage') {
+          return (
+            <View>
+              <Icon name="user-alt" size={25} color={(focused && '#6a9c90') || '#888'} />
+            </View>
+          );
+        }
+      },
+    }),
     tabBarOptions: {
-      activeTintColor: '#6a9c90',
-      inactiveTintColor: '#888',
+      style: {
+        borderTopColor: '#6a9c90',
+        borderTopWidth: 1,
+        borderStyle: 'solid',
+        height: window.height * 0.08,
+      },
+      showLabel: false,
     },
   },
 );
 
 const AppStack = createStackNavigator({
-  //LoadingScreen: LoadingScreen, // 3번 로딩 화면 보기를 위해 급하게 만들었습니다. 이걸 없애면 첫화면이 로그인 화면이 됩니다.
+  LoadingScreen: LoadingScreen, // 3번 로딩 화면 보기를 위해 급하게 만들었습니다. 이걸 없애면 첫화면이 로그인 화면이 됩니다.
   LoginScreen: LoginScreen,
+  CameraStack: CameraScreen,
+  CheckScreen: CheckScreen,
+  CameraNoticeScreen: CameraNoticeScreen,
+  SignUpScreen: SignUpScreen,
+  FindIdScreen: FindIdScreen,
+  FindPwScreen: FindPwScreen,
   TabNavigator: {
     screen: TabNavigator,
     navigationOptions: ({ navigation }) => ({

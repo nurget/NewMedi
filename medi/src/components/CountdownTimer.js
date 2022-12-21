@@ -4,12 +4,12 @@ import moment from 'moment';
 
 function getRecentAlarm(AlarmListArry) {
   //time이 정렬되어있는 fakeAlarmListArray가 인자로 넘어와서 AlarmListArry가 됨
-  for (let time of AlarmListArry) {
+  for (let list of AlarmListArry) {
     let now = moment();
-    let then = moment(time[1], 'hh:mm:ss');
+    let then = moment(list['time'], 'hh:mm:ss');
     let term = moment.duration(then.diff(now));
     if (term.hours() >= 0 && term.minutes() >= 0 && term.seconds() >= 0) {
-      return time[1];
+      return list['time'];
     }
   }
 }
@@ -18,7 +18,6 @@ class CountdownTimer extends React.Component {
   constructor(props) {
     super(props);
     this.props = props;
-
     this.timeTillDate = getRecentAlarm(this.props.upcomingAlarm);
     this.timeFormat = 'hh:mm:ss';
     this.then = moment(this.timeTillDate, this.timeFormat);
@@ -56,46 +55,32 @@ class CountdownTimer extends React.Component {
 
     if (hours === 0 && minutes === 0 && seconds === 0) {
       return (
-        <div>
+        <View>
           <Text>약 복용하실 시간입니다~</Text>
-        </div>
+        </View>
       );
     } else if (!hours && !minutes && hours !== 0 && minutes !== 0) {
       return (
-        <div>
-          <Text>오늘은 복용할 약이 없습니다. 내일도 오늘 같기를!</Text>
-        </div>
+        <View>
+          <Text>오늘은 더이상 복용할 약이 없습니다. 내일도 오늘 같기를!</Text>
+        </View>
       );
     } else {
       return (
-        <div>
-          <Text>
-            <h3>다음 알람까지</h3>
-          </Text>
-          <div className="countdown-wrapper">
+        <View>
+          <Text>다음 알람까지</Text>
+          <View className="countdown-wrapper">
             {
-              <div className="countdown-item">
+              <Text className="countdown-item">
                 {hours}
-                <span> 시간</span>
-              </div>
+                시간
+              </Text>
             }
-            {
-              <div className="countdown-item">
-                {minutes}
-                <span> 분</span>
-              </div>
-            }
-            {
-              <div className="countdown-item">
-                {seconds}
-                <span> 초</span>
-              </div>
-            }
-          </div>
-          <Text>
-            <h3>남았습니다.</h3>
-          </Text>
-        </div>
+            {<Text className="countdown-item">{minutes}분</Text>}
+            {<Text className="countdown-item">{seconds}초</Text>}
+          </View>
+          <Text>남았습니다.</Text>
+        </View>
       );
     }
   }

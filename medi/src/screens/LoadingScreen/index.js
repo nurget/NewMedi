@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 
-//import * as SecureStore from 'expo-secure-store';
-
 import { useAsyncStorage } from '@react-native-community/async-storage';
-const { getItem } = useAsyncStorage('@yag_olim');
+const { getItem, removeItem } = useAsyncStorage('@yag_olim');
 
 export default class LoadingScreen extends Component {
   static navigationOptions = {
@@ -18,38 +16,13 @@ export default class LoadingScreen extends Component {
     };
   }
 
-  // async componentDidMount() {
-  //   const value = await getItem();
-  //   if (value !== null) {
-  //     console.log(value);
-  //     //this.setState({ isAuthorized: true });
-  //     console.log('success');
-  //     this.props.navigation.replace('TabNavigator');
-  //   } else {
-  //     console.log('failed');
-  //     this.props.navigation.replace('LoginScreen');
-  //   }
-  // }
-
-  // read = async () => {
-  //   try {
-  //     const credentials = await SecureStore.getItemAsync('yag_olim');
-  //     if (credentials) {
-  //       console.log('success');
-  //       this.setState({ isAuthorized: true });
-  //     }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
-
   read = async () => {
     try {
       const value = await getItem();
       if (value) {
         console.log('success');
         this.setState({ isAuthorized: true });
-        //this.props.navigation.replace('TabNavigator');
+        console.log(value);
       }
     } catch (e) {
       console.log(e);
@@ -57,12 +30,14 @@ export default class LoadingScreen extends Component {
   };
 
   async componentDidMount() {
-    await this.read();
-    if (this.state.isAuthorized === true) {
-      this.props.navigation.replace('TabNavigator');
-    } else {
-      this.props.navigation.replace('LoginScreen');
-    }
+    await removeItem();
+    // await this.read();
+    // if (this.state.isAuthorized === true) {
+    //   this.props.navigation.replace('TabNavigator');
+    // } else {
+    //   this.props.navigation.replace('LoginScreen');
+    // }
+    this.props.navigation.replace('LoginScreen');
   }
 
   render() {

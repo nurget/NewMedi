@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import { View, Image, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import axios from 'axios';
 
-//import * as Linking from 'expo-linking';
-
-import { useAsyncStorage } from '@react-native-community/async-storage';
 import SocialWebviewModal from './SocialWebviewModal';
-const { getItem, setItem } = useAsyncStorage('@yag_olim');
+import { useAsyncStorage } from '@react-native-community/async-storage';
+const { setItem, getItem, removeItem } = useAsyncStorage('@yag_olim');
 
 //import axios from 'axios';
 
@@ -24,77 +23,95 @@ export default class LoginScreen extends Component {
     };
   }
 
-  // _storeData = async (auth) => {
-  //   await setItem(auth);
-  //   console.log('success');
-  //   this.props.navigation.replace('TabNavigator');
-  // };
+  set = async (data) => {
+    try {
+      console.log('success token');
+      await setItem(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-  // read = async () => {
-  //   try {
-  //     const value = await getItem();
-  //     if (value) {
-  //       console.log('success');
-  //       this.props.navigation.replace('TabNavigator');
-  //     }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
+  read = async () => {
+    try {
+      const value = await getItem();
+      if (value) {
+        console.log('success');
+        console.log(value);
+        this.props.navigation.replace('TabNavigator');
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-  // componentDidMount() {
-  //   this.read();
-  //   this._storeData('auth');
-  // Linking.getInitialURL().then((url) => {
-  //   let newURL = Linking.parse(url);
-  //   let auth = newURL.queryParams.authorization;
-  //   if (auth !== undefined) {
-  //     this._storeData(auth);
-  //   }
-  // });
-  //}
+  componentDidMount = async () => {
+    //await this.read();
+    // await setItem(
+    //   'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MX0.UgGrWBSBD2t1PHbjRRr3kSqWr3ECc65oXndQaaCrKqc',
+    // );
+    await removeItem();
+  };
 
-  //일반 로그인을 위해 필요한 부분. 서버는 아직 구현하지 못했지만, 클라는 소셜로그인 API 진행하는 겸사 구현하겠습니다.
   onEmailChange(email) {
-    this.setState({ email });
+    this.setState({ email: email });
   }
 
   onPasswordChange(password) {
-    this.setState({ password });
+    this.setState({ password: password });
   }
 
   //소셜 로그인
   onPressSocial = async (social) => {
     this.setState({
       socialModalVisible: !this.state.socialModalVisible,
-      source: `https://gentle-anchorage-17372.herokuapp.com/oauth/${social}`,
+      source: `https://yag-olim-test-prod.herokuapp.com/users/oauth/${social}`,
     });
   };
 
-  closeSocialModal = () => {
+  closeSocialModal = async () => {
     this.setState({
       socialModalVisible: !this.state.socialModalVisible,
     });
+    try {
+      const value = await getItem();
+      if (value) {
+        this.props.navigation.replace('TabNavigator');
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   // 일반 로그인
-  // onPressLogin() {
-  //   axios({
-  //     method: 'get',
-  //     url: 'http://localhost:5000/users',
-  //     data: {
-  //       email: this.state.email,
-  //       password: this.state.password,
-  //     },
-  //   }).then((data) => {
-  //     console.log(data);
-  //   });
-  //   //.then(onSuccess)
-  //   //.catch(onFailure);
-  // }
-
   doLogin() {
-    this.props.navigation.replace('TabNavigator');
+    axios
+      .post('http://127.0.0.1:5000/users/login', {
+        users: {
+          email: this.state.email,
+          password: this.state.password,
+        },
+      })
+      .then((res) => {
+        console.log(res.data.Authorization);
+        const user_token = res.data.Authorization;
+        this.set(user_token);
+        this.read();
+      })
+      .catch((e) => {
+        console.log(e);
+        Alert.alert(
+          '에러가 발생했습니다!',
+          '다시 시도해주세요',
+          [
+            {
+              text: '다시시도하기',
+              onPress: () => this.doLogin(),
+            },
+          ],
+          { cancelable: false },
+        );
+      });
   }
 
   render() {
@@ -106,7 +123,7 @@ export default class LoginScreen extends Component {
             width: 310 * 0.85,
             height: 111 * 0.85,
           }}
-          source={require('../../img/loginMain.png')}
+          source={require('../../images/loginMain.png')}
         />
         <View style={styles.LoginBox}>
           <Text style={{ color: 'white', fontSize: 16 }}>ID</Text>
@@ -116,7 +133,7 @@ export default class LoginScreen extends Component {
             placeholder={'e-mail'}
             autoCapitalize="none"
             autoCorrect={false}
-            onChangeText={this.onEmailChange}
+            onChangeText={(emailValue) => this.setState({ email: emailValue })}
             underlineColorAndroid="transparent"
             placeholderTextColor="#999"
             style={{
@@ -133,9 +150,8 @@ export default class LoginScreen extends Component {
           <TextInput
             autoCompleteType={'password'}
             placeholder={'password'}
-            keyboardType={'password'}
             secureTextEntry={true}
-            onChangeText={this.onPasswordChange}
+            onChangeText={(passwordValue) => this.setState({ password: passwordValue })}
             underlineColorAndroid="transparent"
             placeholderTextColor="#999"
             style={{
@@ -163,7 +179,7 @@ export default class LoginScreen extends Component {
           >
             <Text
               style={{ color: '#649A8D', fontSize: 18, fontWeight: 'bold' }}
-              onPress={this.doLogin}
+              onPress={this.doLogin.bind(this)}
             >
               들어가기
             </Text>
@@ -185,18 +201,54 @@ export default class LoginScreen extends Component {
                 borderRadius: 20,
                 height: 60,
                 padding: 10,
-                marginBottom: 50,
                 flexDirection: 'row',
               }}
               onPress={() => this.onPressSocial('kakao')}
             >
               <Image
                 style={{ width: 35, height: 40, marginRight: 30 }}
-                source={require('../../img/kakaoLogo.png')}
+                source={require('../../images/kakaoLogo.png')}
               />
               <Text style={{ color: '#391B1B', fontSize: 18, fontWeight: 'bold' }}>
                 카카오 로그인
               </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <TouchableOpacity
+              style={{
+                justifyContent: 'center',
+                padding: 10,
+              }}
+              onPress={() => {
+                this.props.navigation.navigate('SignUpScreen');
+              }}
+            >
+              <Text style={{ fontSize: 14, color: 'white' }}>회원가입</Text>
+            </TouchableOpacity>
+            <Text style={{ fontSize: 14, color: 'white', paddingTop: 10 }}>|</Text>
+            <TouchableOpacity
+              style={{
+                justifyContent: 'center',
+                padding: 10,
+              }}
+              onPress={() => {
+                this.props.navigation.navigate('FindIdScreen');
+              }}
+            >
+              <Text style={{ fontSize: 14, color: 'white' }}>아이디 찾기</Text>
+            </TouchableOpacity>
+            <Text style={{ fontSize: 14, color: 'white', paddingTop: 10 }}>|</Text>
+            <TouchableOpacity
+              style={{
+                justifyContent: 'center',
+                padding: 10,
+              }}
+              onPress={() => {
+                this.props.navigation.navigate('FindPwScreen');
+              }}
+            >
+              <Text style={{ fontSize: 14, color: 'white' }}>비밀번호 찾기</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -221,7 +273,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    marginTop: 30,
-    paddingTop: 30,
   },
 });

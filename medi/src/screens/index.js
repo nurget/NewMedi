@@ -1,167 +1,277 @@
 import React from 'react';
-import { Text, View, Dimensions } from 'react-native';
-import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
-import { createBottomTabNavigator } from 'react-navigation-tabs';
-import HomeScreen from './HomeScreen';
-import LoadingScreen from './LoadingScreen';
-import CalendarScreen from './CalendarScreen';
-import AlarmScreen from './AlarmScreen';
-import MedicineBoxScreen from './MedicineBoxScreen';
-import LoginScreen from './LoginScreen';
-import MypageScreen from './MypageScreen';
-import EditMyinfoScreen from './MypageScreen/EditMyinfo';
-import CameraScreen from './CameraScreen';
-import CameraNoticeScreen from './CameraNoticeScreen';
-import CheckScreen from './CheckScreen';
-import SelfInputScreen from './SelfInputScreen';
-import AlarmUpdateScreen from './AlarmUpdateScreen';
-import MedicineDetailScreen from './MedicineBoxScreen/MedicineDetailScreen';
-import DeleteCheckScreen from './AlarmUpdateScreen/DeleteCheck';
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import SignUpScreen from './LoginScreen/SignUp';
-import FindIdScreen from './LoginScreen/FindId';
-import FindPwScreen from './LoginScreen/FindPw';
+import {
+  View,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  Dimensions,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import axios from 'axios';
+import { useAsyncStorage } from '@react-native-community/async-storage';
+import { ScrollView } from 'react-native-gesture-handler';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
+
+const { getItem } = useAsyncStorage('@yag_olim');
 
 const window = Dimensions.get('window');
+let verticalMargin = window.height * 0.02;
 
-const MypageStack = createStackNavigator(
-  {
-    Mypage: MypageScreen,
-    LoginScreen: LoginScreen,
-    EditMyinfoScreen: EditMyinfoScreen,
-  },
-  {
-    initialRouteName: 'Mypage',
-    headerMode: 'none',
+export default class CheckScreen extends React.Component {
+  static navigationOptions = {
     headerShown: false,
-  },
-);
+  };
 
-const AlarmStack = createStackNavigator(
-  {
-    Alarm: AlarmScreen,
-    SelfInputScreen: SelfInputScreen,
-  },
-  {
-    initialRouteName: 'Alarm',
-    headerMode: 'none',
-    headerShown: false,
-  },
-);
+  constructor(props) {
+    super(props);
+    this.state = {
+      uri: this.props.navigation.getParam('uri'),
+      form_data: this.props.navigation.getParam('form_data'),
+      getImg: '../../img/loginMain.png',
+      medicineName: '',
+      effect: '',
+      capacity: '',
+      validity: '',
+      imgS3Uri: null,
+      update: this.props.navigation.getParam('update'),
+      item: this.props.navigation.getParam('item'),
+      clickedDate: this.props.navigation.getParam('clickedDate'),
+    };
+  }
 
-const CalendarStack = createStackNavigator(
-  {
-    Calendar: CalendarScreen,
-    AlarmUpdateScreen: AlarmUpdateScreen,
-    SelfInputScreen: SelfInputScreen,
-    DeleteCheck: DeleteCheckScreen,
-  },
-  {
-    headerMode: 'none',
-    headerShown: false,
-  },
-);
+  async componentDidMount() {
+    const getImg = await FileSystem.getInfoAsync(this.state.uri);
+    console.log(getImg['uri']);
+    this.setState({ getImg: getImg['uri'] });
+  }
 
-const MedicineBoxStack = createStackNavigator(
-  {
-    MedicineBox: MedicineBoxScreen,
-    MedicineDetail: MedicineDetailScreen,
-  },
-  {
-    headerMode: 'none',
-    headerShown: false,
-  },
-);
+  redirectToAlarmScreen() {
+    async function get_token() {
+      const token = await getItem();
+      return token;
+    }
+    get_token()
+      .then((token) => {
+        axios
+          .post('http://127.0.0.1:5000/medicines/upload', this.state.form_data, {
+            headers: {
+              'content-type': 'multipart/form-data',
+              Authorization: token,
+            },
+          })
+          .then((res) => {
+            console.log(res.data.results);
+            this.setState({
+              imgS3Uri: res.data.results,
+            });
+          })
+          .then(() => {
+            if (this.state.update === true) {
+              this.props.navigation.navigate('AlarmUpdateScreen', {
+                alarmMedicine: {
+                  name: this.state.medicineName,
+                  image_dir: this.state.imgS3Uri,
+                  camera: false,
+                  title: null,
+                  effect: this.state.effect,
+                  capacity: this.state.capacity,
+                  validity: this.state.validity,
+                },
+                item: this.state.item,
+                clickedDate: this.state.clickedDate,
+              });
+            } else {
+              this.props.navigation.navigate('Alarm', {
+                alarmMedicine: {
+                  name: this.state.medicineName,
+                  image_dir: this.state.imgS3Uri,
+                  camera: false,
+                  title: null,
+                  effect: this.state.effect,
+                  capacity: this.state.capacity,
+                  validity: this.state.validity,
+                },
+              });
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            Alert.alert(
+              '에러가 발생했습니다!',
+              '다시 시도해주세요',
+              [
+                {
+                  text: '다시시도하기',
+                  onPress: () => this.redirectToAlarmScreen(),
+                },
+              ],
+              { cancelable: false },
+            );
+          });
+      })
+      .catch((err) => {
+        console.error(err);
+        Alert.alert(
+          '에러가 발생했습니다!',
+          '다시 시도해주세요',
+          [
+            {
+              text: '다시시도하기',
+              onPress: () => this.redirectToAlarmScreen(),
+            },
+          ],
+          { cancelable: false },
+        );
+      });
+  }
 
-const TabNavigator = createBottomTabNavigator(
-  {
-    Home: { screen: HomeScreen },
-    Calendar: { screen: CalendarStack },
-    Alarm: { screen: AlarmStack },
-    MedicineBox: { screen: MedicineBoxStack },
-    Mypage: { screen: MypageStack },
-  },
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      tabBarIcon: ({ focused }) => {
-        const { routeName } = navigation.state;
+  render() {
+    return (
+      <View
+        style={{
+          height: window.height * 0.9,
+          width: window.width - 40,
+          marginLeft: 20,
+          alignItems: 'center',
+          marginTop: getStatusBarHeight(),
+        }}
+      >
+        <ScrollView
+          style={{
+            height: window.height * 0.8,
+          }}
+        >
+          <Image
+            style={{
+              width: window.width - 40,
+              height: window.width - 40,
+              borderRadius: 50,
+              marginTop: verticalMargin,
+            }}
+            source={{ uri: this.state.getImg }}
+          />
 
-        if (routeName === 'Home') {
-          return (
-            <View>
-              <Icon name="home" size={25} color={(focused && '#6a9c90') || '#888'} />
-            </View>
-          );
-        }
-        if (routeName === 'Calendar') {
-          return (
-            <View style={{ paddingRight: 10 }}>
-              <Icon name="calendar-alt" size={25} color={(focused && '#6a9c90') || '#888'} />
-            </View>
-          );
-        }
-        if (routeName === 'Alarm') {
-          return (
-            <View
-              style={{
-                backgroundColor: '#6a9c90',
-                width: window.height * 0.09,
-                height: window.height * 0.06,
-                borderRadius: window.height * 0.06,
-                alignItems: 'center',
-                justifyContent: 'center',
+          <Text
+            style={{
+              fontSize: 20,
+              color: '#313131',
+              fontWeight: 'bold',
+              marginTop: '5%',
+              marginBottom: '5%',
+              textAlign: 'center',
+            }}
+          >
+            직접 입력하기
+          </Text>
+
+          {/* -- 약 이름 입력 뷰 -- */}
+          <View style={styles.textInputBox}>
+            <Text style={styles.textInputTitle}>약 이름</Text>
+
+            <TextInput
+              style={styles.textInputStyle}
+              placeholder="약 이름을 입력하세요 :)"
+              placeholderTextColor={'gray'}
+              maxLength={10}
+              onChangeText={(medicineNameValue) =>
+                this.setState({ medicineName: medicineNameValue })
+              }
+              defaultValue={this.state.medicineName}
+            />
+          </View>
+
+          {/* -- 효능/효과 메모 입력 뷰 -- */}
+          <View style={styles.textInputBox}>
+            <Text style={styles.textInputTitle}>효능/효과</Text>
+            <TextInput
+              style={styles.textInputStyle}
+              placeholder="효능/효과을 입력하세요!"
+              placeholderTextColor={'gray'}
+              maxLength={30}
+              onChangeText={(effectValue) => this.setState({ effect: effectValue })}
+              defaultValue={this.state.effect}
+            />
+          </View>
+
+          {/* -- 용법/용량 메모 입력 뷰 -- */}
+          <View style={styles.textInputBox}>
+            <Text style={styles.textInputTitle}>용법/용량</Text>
+            <TextInput
+              style={styles.textInputStyle}
+              placeholder="용법/용량을 입력하세요!"
+              placeholderTextColor={'gray'}
+              maxLength={30}
+              onChangeText={(capacityValue) => this.setState({ capacity: capacityValue })}
+              defaultValue={this.state.capacity}
+            />
+          </View>
+
+          {/* -- 유효기간 메모 입력 뷰 -- */}
+          <View style={styles.textInputBox}>
+            <Text style={styles.textInputTitle}>유효기간</Text>
+            <TextInput
+              style={styles.textInputStyle}
+              placeholder="유효기간을 입력하세요!"
+              placeholderTextColor={'gray'}
+              maxLength={30}
+              onChangeText={(validityValue) => this.setState({ validity: validityValue })}
+              defaultValue={this.state.validity}
+            />
+          </View>
+
+          {/* -- 확인 버튼 -- */}
+          <View style={{ alignItems: 'center', marginTop: 10, marginBottom: 20 }}>
+            <TouchableOpacity
+              onPress={() => {
+                this.redirectToAlarmScreen();
               }}
             >
-              {/* <Icon name="clock" size={25} color={(focused && '#6a9c90') || '#888'} /> */}
-              <Text style={{ color: 'white', fontSize: 30, fontWeight: '800', marginBottom: 5 }}>
-                +
-              </Text>
-            </View>
-          );
-        }
-        if (routeName === 'MedicineBox') {
-          return (
-            <View style={{ paddingLeft: 10 }}>
-              <Icon name="pills" size={25} color={(focused && '#6a9c90') || '#888'} />
-            </View>
-          );
-        }
-        if (routeName === 'Mypage') {
-          return (
-            <View>
-              <Icon name="user-alt" size={25} color={(focused && '#6a9c90') || '#888'} />
-            </View>
-          );
-        }
-      },
-    }),
-    tabBarOptions: {
-      style: {
-        borderTopColor: '#6a9c90',
-        borderTopWidth: 1,
-        borderStyle: 'solid',
-        height: window.height * 0.08,
-      },
-      showLabel: false,
-    },
-  },
-);
+              <View
+                style={{
+                  justifyContent: 'center',
+                  marginTop: 10,
+                  alignItems: 'center',
+                  width: window.width * 0.7,
+                  height: window.height * 0.075,
+                  backgroundColor: '#76a991',
+                  borderRadius: window.height * 0.075,
+                }}
+              >
+                <Text style={{ fontSize: 20, color: 'white' }}>이걸로 결정!</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+}
 
-const AppStack = createStackNavigator({
-  LoadingScreen: LoadingScreen, // 3번 로딩 화면 보기를 위해 급하게 만들었습니다. 이걸 없애면 첫화면이 로그인 화면이 됩니다.
-  LoginScreen: LoginScreen,
-  CameraStack: CameraScreen,
-  CheckScreen: CheckScreen,
-  CameraNoticeScreen: CameraNoticeScreen,
-  SignUpScreen: SignUpScreen,
-  FindIdScreen: FindIdScreen,
-  FindPwScreen: FindPwScreen,
-  TabNavigator: {
-    screen: TabNavigator,
-    navigationOptions: ({ navigation }) => ({
-      headerShown: false,
-    }),
+const styles = StyleSheet.create({
+  textInputBox: {
+    marginBottom: verticalMargin,
+    borderBottomWidth: 1,
+    borderBottomColor: '#76a991',
+    borderStyle: 'solid',
+    width: window.width - 40,
+    paddingBottom: window.height * 0.015,
+  },
+  textInputTitle: {
+    fontSize: 18,
+    fontWeight: '200',
+    color: '#626262',
+    paddingLeft: 5,
+  },
+  textInputStyle: {
+    textAlign: 'left',
+    marginTop: 5,
+    marginLeft: 10,
+    fontSize: 16,
+    width: window.width - 60,
+    borderBottomWidth: 1,
+    borderBottomColor: '#d4d4d4',
   },
 });
-export default createAppContainer(AppStack);
